@@ -17,46 +17,6 @@ SET time_zone = "+00:00";
 -- Base de données : `db_woofing`
 --
 
-DELIMITER $$
---
--- Procédures
---
-CREATE DEFINER=`simplon`@`localhost` PROCEDURE `inscription_chantier` (IN `id_chantier` INT)  BEGIN
-
-declare inscrits int ; 
-declare capacite int ; 
-
-SELECT nbr_pers_inscrites INTO inscrits FROM chantier where id= id_chantier; 
-SELECT capacite INTO capacite from living_place lp inner join chantier c on c.id_place =lp.id where c.id = id_chantier; 
-
-if inscrits < capacite then 
-	UPDATE chantier SET nbr_pers_inscrites =  nbr_pers_inscrites + 1 , nbr_pers_presentes = nbr_pers_presentes +1 WHERE id = id_chantier; 
- 	
-end if ;
-END$$
-
-CREATE DEFINER=`simplon`@`localhost` PROCEDURE `montee_competence` (IN `id_user` INT)  BEGIN
-
-DECLARE level int; 
-DECLARE id_comp int; 
-
-select c.niveau into level from utilisateur u 
-inner join utilisateur_competence uc on uc.id_user = u.id 
-inner join competence c On c.id = uc.id_comp 
-where u.id = id_user and c.id = uc.id_comp ; 
-
-select uc.id_comp into id_comp from utilisateur u 
-inner join utilisateur_competence uc on uc.id_user = u.id 
-inner join competence c On c.id = uc.id_comp 
-where u.id = id_user and c.id = uc.id_comp; 
-
-
-UPDATE competence  SET niveau = level+1  where id = id_comp;
-
-END$$
-
-DELIMITER ;
-
 -- --------------------------------------------------------
 
 --
@@ -68,19 +28,6 @@ CREATE TABLE `activite` (
   `nom` varchar(55) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- RELATIONS POUR LA TABLE `activite`:
---
-
---
--- Déchargement des données de la table `activite`
---
-
-INSERT INTO `activite` (`id`, `nom`) VALUES
-(1, 'jardinage'),
-(2, 'bricolage'),
-(3, 'maconnerie');
-
 -- --------------------------------------------------------
 
 --
@@ -91,24 +38,6 @@ CREATE TABLE `activite_competence` (
   `id_activite` int(11) NOT NULL,
   `id_competence` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- RELATIONS POUR LA TABLE `activite_competence`:
---   `id_activite`
---       `activite` -> `id`
---   `id_competence`
---       `competence` -> `id`
---
-
---
--- Déchargement des données de la table `activite_competence`
---
-
-INSERT INTO `activite_competence` (`id_activite`, `id_competence`) VALUES
-(1, 1),
-(1, 2),
-(1, 3),
-(2, 1);
 
 -- --------------------------------------------------------
 
@@ -126,26 +55,6 @@ CREATE TABLE `chantier` (
   `id_place` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- RELATIONS POUR LA TABLE `chantier`:
---   `id_place`
---       `living_place` -> `id`
---
-
---
--- Déchargement des données de la table `chantier`
---
-
-INSERT INTO `chantier` (`id`, `type_chantier`, `date_debut`, `date_fin`, `nbr_pers_inscrites`, `nbr_pers_presentes`, `id_place`) VALUES
-(1, 'Plants et semis', '2021-02-12', '2021-11-02', 1, 0, 1),
-(2, 'Refaire toiture', '2021-05-06', '2021-05-23', 3, 0, 2),
-(3, 'construction terrasses de culture', '2021-05-06', '2021-05-23', 2, 0, 1),
-(4, 'maconnerie', '2021-02-12', '2021-11-02', 2, 0, 2),
-(5, 'maconnerie', '2021-05-06', '2021-05-23', 2, 0, 1),
-(6, 'maconnerie', '2021-05-06', '2021-05-23', 2, 0, 1),
-(7, 'Bricolage', '2021-05-06', '2021-05-23', 2, 0, 1),
-(8, 'plomberie', '2021-04-25', '2021-04-30', 1, 0, 1);
-
 -- --------------------------------------------------------
 
 --
@@ -156,25 +65,6 @@ CREATE TABLE `chantier_activite` (
   `id_activite` int(11) NOT NULL,
   `id_chantier` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- RELATIONS POUR LA TABLE `chantier_activite`:
---   `id_activite`
---       `activite` -> `id`
---   `id_chantier`
---       `chantier` -> `id`
---
-
---
--- Déchargement des données de la table `chantier_activite`
---
-
-INSERT INTO `chantier_activite` (`id_activite`, `id_chantier`) VALUES
-(1, 1),
-(1, 2),
-(1, 3),
-(2, 3),
-(3, 1);
 
 -- --------------------------------------------------------
 
@@ -187,27 +77,6 @@ CREATE TABLE `competence` (
   `nom` varchar(50) NOT NULL,
   `niveau` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- RELATIONS POUR LA TABLE `competence`:
---
-
---
--- Déchargement des données de la table `competence`
---
-
-INSERT INTO `competence` (`id`, `nom`, `niveau`) VALUES
-(1, 'zinguerie', 1),
-(2, 'elagage', 0),
-(3, 'cuisine', 2),
-(4, 'zinguerie', 1),
-(5, 'elagage', 0),
-(6, 'maraichage', 3),
-(7, 'cuisine', 2),
-(8, 'zinguerie', 1),
-(9, 'elagage', 0),
-(10, 'maraichage', 3),
-(11, 'cuisine', 2);
 
 -- --------------------------------------------------------
 
@@ -225,19 +94,6 @@ CREATE TABLE `living_place` (
   `pays` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- RELATIONS POUR LA TABLE `living_place`:
---
-
---
--- Déchargement des données de la table `living_place`
---
-
-INSERT INTO `living_place` (`id`, `type`, `capacite`, `adresse`, `code_postal`, `ville`, `pays`) VALUES
-(1, 'ferme', 5, 'avenue du rocher des fées', 48400, 'Florac', 'France'),
-(2, 'Auberge', 8, 'rue Victor Hugo', 48620, 'Ste-Enimie', 'France'),
-(3, 'Exploitation horticole', 3, 'via cupello 74', 86047, 'Santa Croce di Magliano ', 'Italie');
-
 -- --------------------------------------------------------
 
 --
@@ -254,33 +110,6 @@ CREATE TABLE `utilisateur` (
   `is_host` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- RELATIONS POUR LA TABLE `utilisateur`:
---
-
---
--- Déchargement des données de la table `utilisateur`
---
-
-INSERT INTO `utilisateur` (`id`, `first_name`, `last_name`, `date_naissance`, `email`, `password`, `is_host`) VALUES
-(1, 'Pierre', 'Solignac', '1986-05-06', 'pierre@ici.fr', '1234', 1),
-(22, 'Pierre', 'Solignac', '1986-05-06', 'pierre@gmail.fr', '1234', 1),
-(23, 'Paul', 'Solignac', '1980-11-12', 'paul@ici.fr', '1234', 0),
-(24, 'Jacques', 'Henry', '1991-08-15', 'jacques@la.fr', '1234', 1),
-(25, 'Edouard', 'Maurel', '1973-04-05', 'EdM@ici.fr', '1234', 0);
-
---
--- Déclencheurs `utilisateur`
---
-DELIMITER $$
-CREATE TRIGGER `hasher_mdp` BEFORE INSERT ON `utilisateur` FOR EACH ROW BEGIN
-
-UPDATE utilisateur SET NEW.password = MD5(password);
-
-END
-$$
-DELIMITER ;
-
 -- --------------------------------------------------------
 
 --
@@ -291,24 +120,6 @@ CREATE TABLE `utilisateur_competence` (
   `id_comp` int(11) NOT NULL,
   `id_user` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- RELATIONS POUR LA TABLE `utilisateur_competence`:
---   `id_comp`
---       `competence` -> `id`
---   `id_user`
---       `utilisateur` -> `id`
---
-
---
--- Déchargement des données de la table `utilisateur_competence`
---
-
-INSERT INTO `utilisateur_competence` (`id_comp`, `id_user`) VALUES
-(1, 1),
-(1, 24),
-(2, 22),
-(3, 23);
 
 -- --------------------------------------------------------
 
@@ -322,25 +133,6 @@ CREATE TABLE `utilistateur_chantier` (
   `ask_chantier` tinyint(1) DEFAULT 0,
   `is_present` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- RELATIONS POUR LA TABLE `utilistateur_chantier`:
---   `id_chantier`
---       `chantier` -> `id`
---   `id_user`
---       `utilisateur` -> `id`
---
-
---
--- Déchargement des données de la table `utilistateur_chantier`
---
-
-INSERT INTO `utilistateur_chantier` (`id_chantier`, `id_user`, `ask_chantier`, `is_present`) VALUES
-(1, 25, NULL, 0),
-(2, 1, 1, 1),
-(2, 23, 1, 0),
-(3, 22, NULL, 0),
-(5, 1, NULL, 0);
 
 --
 -- Déclencheurs `utilistateur_chantier`
@@ -366,24 +158,6 @@ CREATE TABLE `utilistateur_living_place` (
   `id_place` int(11) NOT NULL,
   `id_user` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- RELATIONS POUR LA TABLE `utilistateur_living_place`:
---   `id_place`
---       `living_place` -> `id`
---   `id_user`
---       `utilisateur` -> `id`
---
-
---
--- Déchargement des données de la table `utilistateur_living_place`
---
-
-INSERT INTO `utilistateur_living_place` (`id_place`, `id_user`) VALUES
-(1, 1),
-(2, 22),
-(2, 23),
-(3, 24);
 
 -- --------------------------------------------------------
 
@@ -423,37 +197,20 @@ CREATE TABLE `voir_hotes_lieu` (
 -- --------------------------------------------------------
 
 --
--- Structure de la vue `voir_chantiers_lieu_competence` exportée comme une table
+-- Structure de la vue `voir_chantiers_lieu_competence`
 --
 DROP TABLE IF EXISTS `voir_chantiers_lieu_competence`;
-CREATE TABLE`voir_chantiers_lieu_competence`(
-    `date_debut` date NOT NULL,
-    `date_fin` date NOT NULL,
-    `type_chantier` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-    `ville` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-    `pays` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-    `type_activite` varchar(55) COLLATE utf8mb4_general_ci NOT NULL,
-    `competences_demandees` mediumtext COLLATE utf8mb4_general_ci DEFAULT NULL,
-    `niveau_demande` int(11) DEFAULT NULL
-);
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`simplon`@`localhost` SQL SECURITY DEFINER VIEW `voir_chantiers_lieu_competence`  AS  select `c`.`date_debut` AS `date_debut`,`c`.`date_fin` AS `date_fin`,`c`.`type_chantier` AS `type_chantier`,`lp`.`ville` AS `ville`,`lp`.`pays` AS `pays`,`a`.`nom` AS `type_activite`,group_concat(`co`.`nom` separator ' - ') AS `competences_demandees`,`co`.`niveau` AS `niveau_demande` from (((`chantier` `c` join `living_place` `lp` on(`c`.`id_place` = `lp`.`id`)) join `activite` `a` on(`lp`.`id` = `a`.`id`)) join `competence` `co` on(`co`.`id` = `a`.`id`)) group by `c`.`type_chantier` ;
 
 -- --------------------------------------------------------
 
 --
--- Structure de la vue `voir_hotes_lieu` exportée comme une table
+-- Structure de la vue `voir_hotes_lieu`
 --
 DROP TABLE IF EXISTS `voir_hotes_lieu`;
-CREATE TABLE`voir_hotes_lieu`(
-    `first_name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-    `last_name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-    `email` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-    `type` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-    `capacite` smallint(6) DEFAULT NULL,
-    `adresse` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-    `code_postal` int(11) DEFAULT NULL,
-    `ville` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-    `pays` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL
-);
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`simplon`@`localhost` SQL SECURITY DEFINER VIEW `voir_hotes_lieu`  AS  select `u`.`first_name` AS `first_name`,`u`.`last_name` AS `last_name`,`u`.`email` AS `email`,`lp`.`type` AS `type`,`lp`.`capacite` AS `capacite`,`lp`.`adresse` AS `adresse`,`lp`.`code_postal` AS `code_postal`,`lp`.`ville` AS `ville`,`lp`.`pays` AS `pays` from ((`utilisateur` `u` left join `utilistateur_living_place` `ulp` on(`ulp`.`id_user` = `u`.`id`)) left join `living_place` `lp` on(`lp`.`id` = `ulp`.`id_place`)) where `u`.`is_host` = 1 ;
 
 --
 -- Index pour les tables déchargées
@@ -533,31 +290,31 @@ ALTER TABLE `utilistateur_living_place`
 -- AUTO_INCREMENT pour la table `activite`
 --
 ALTER TABLE `activite`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `chantier`
 --
 ALTER TABLE `chantier`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `competence`
 --
 ALTER TABLE `competence`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `living_place`
 --
 ALTER TABLE `living_place`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `utilisateur`
 --
 ALTER TABLE `utilisateur`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Contraintes pour les tables déchargées
